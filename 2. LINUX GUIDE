@@ -1,0 +1,46 @@
+*Linux architecture*
+
+The architecture of Linux is a layered structure that manages the hardware of a computer and provides a platform for applications to run. It is designed to be modular, secure, and efficient.
+Think of it like a layered cake: the hardware is the plate, the Kernel is the dense base layer, and the applications are the frosting on top that you actually interact with.
+Here is a breakdown of the key components of the Linux architecture.
+
+1. The Hardware Layer
+This is the physical foundation—your computer's actual machinery. It includes the CPU (Central Processing Unit), RAM (Memory), Hard Drives (Storage), and input/output devices like your network card, mouse, and keyboard.
+Role: Performs the actual calculations and stores data.
+Interaction: The hardware does not know how to run software on its own; it relies on the OS (Operating System) to give it instructions.
+
+2. The Kernel
+The Kernel is the core of the Linux operating system. It is the "brain" that sits directly on top of the hardware and controls everything. It is the only part of the OS that runs in "Kernel Mode" (giving it unrestricted access to hardware).
+Key responsibilities of the Kernel include:
+Process Management: Decides which applications get to use the CPU and for how long (scheduling).
+Memory Management: Assigns RAM to applications and ensures they don't overwrite each other's memory.
+Device Drivers: Small pieces of software that translate the OS's instructions into the specific language of hardware components (like your graphics card or printer).
+System Calls: A set of rules allowing software to request services from the Kernel (e.g., "Please save this file to the hard drive").
+
+3. The Shell
+The Shell is an interface that allows users (you) to communicate with the Kernel. It takes human-readable commands and translates them into instructions the Kernel can understand.
+Types: The most common is Bash (Bourne Again Shell), but there are others like Zsh and Csh.
+Function: When you type ls to list files, the Shell interprets that text and calls the necessary programs to show you the result.
+It effectively hides the complexity of the Kernel from the user.
+
+4. System Libraries (glibc)
+These are special functions that applications use to access the Kernel's features. Instead of writing complex code to "write to disk" every time, a programmer uses a standard library function (like fopen in C) which triggers the appropriate System Call.
+Role: Acts as the bridge between User Applications and the Kernel.
+
+5. System Utilities (Daemons)
+These are background processes that run automatically to keep the system functioning. They are often called Daemons in Linux.
+Examples:
+sshd: Listens for incoming remote connections.
+cron: Runs scheduled tasks (like automated backups) at specific times.
+httpd: Handles web server requests.
+
+6. User Applications (User Space)
+This is the top layer where you spend your time. It includes all the programs you run, such as web browsers (Firefox, Chrome), text editors (Vim, VS Code), media players, and office suites.
+User Space: Unlike the Kernel, these programs run with restricted privileges ("User Mode"). If a web browser crashes, it doesn't crash the whole computer because it doesn't have direct control over the hardware.
+Summary of the Flow
+
+User interacts with an Application (e.g., clicking "Save" in a text editor).
+The Application uses System Libraries to send a request.
+The System Library makes a System Call to the Kernel.
+The Kernel commands the Hardware (Hard Drive) to write the data.
+The Hardware confirms the task is done, and the confirmation travels back up the chain to the User.
