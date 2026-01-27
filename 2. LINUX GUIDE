@@ -47,3 +47,6 @@ The Application uses System Libraries to send a request.
 The System Library makes a System Call to the Kernel.
 The Kernel commands the Hardware (Hard Drive) to write the data.
 The Hardware confirms the task is done, and the confirmation travels back up the chain to the User.
+
+(power on -> BIOS -> GNU GRUB linux kernal -> ununtu loading -> init process / systemD -> systemctl)
+
