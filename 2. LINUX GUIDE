@@ -50,3 +50,37 @@ The Hardware confirms the task is done, and the confirmation travels back up the
 
 (power on -> BIOS -> GNU GRUB linux kernal -> ununtu loading -> init process / systemD -> systemctl)
 
+ *SSH*
+
+SSH, or Secure Shell, is a network protocol that gives you a secure way to access and control a computer over an unsecured network (like the internet).
+
+If you are managing a remote server—which you likely are with your work in AWS and Kubernetes—SSH is the "tunnel" you use to talk to that machine.
+
+How It Works
+At its core, SSH creates a secure "encrypted pipe" between two points:
+- The SSH Client: Your local machine (e.g., your MacBook Air).
+- The SSH Server: The remote machine you want to control (e.g., an EC2 instance).
+Once the connection is established, anything you type into your terminal is sent through that encrypted tunnel and executed on the remote server. The server then sends the output back through the same tunnel.
+
+Key Features
+Encryption: Even if someone intercepts the data traveling between your laptop and the server, they’ll only see "garbage" text. It protects your passwords and commands.
+
+Authentication: SSH ensures you are talking to the correct server and that the server knows exactly who you are.
+Remote Command Line: It isn’t a graphical interface (like Remote Desktop); it’s purely text-based, which makes it incredibly fast and efficient for DevOps tasks.
+SSH Keys vs. Passwords
+While you can use a password to log in via SSH, the industry standard (especially in Cloud/DevOps) is using SSH Key Pairs. This is much more secure and allows for automation.
+
+Public Key: Think of this as a lock. You put this on any server you want to access.
+Private Key: Think of this as the physical key on your MacBook. You never share this with anyone.
+When you try to connect, the server uses your Public Key to "challenge" your computer. If you have the matching Private Key, you're in.
+
+# the public key always stays in the client server and the private key has to be in remote server to which we want to connect, and the authentication will only pass if client's public key matches with the remote's private key 
+
+*Package installer*
+
+ubuntu - apt
+redhat - rpm,dnf
+centOS - yum
+
+
+
