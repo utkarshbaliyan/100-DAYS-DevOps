@@ -1,1 +1,16 @@
+why docker? what was the problem developes facing before docker 
+what is containerization?
+what is docker engine?
+what is the difference between virtualization and containerization?
 
+docker
+- docker client 
+- docker engine 
+- docker deamon 
+- docker registary 
+
+what is docker file -> docker image -> docker container 
+
+port mapping 
+
+how to create docker file 
