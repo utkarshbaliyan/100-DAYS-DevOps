@@ -9,8 +9,27 @@ docker
 - docker deamon 
 - docker registary 
 
-what is docker file -> docker image -> docker container 
+- what is docker file -> docker image -> docker container 
 
-port mapping 
+- port mapping 
 
-how to create docker file 
+- how to create docker file 
+
+- multistage docker build 
+- distroless images 
+- data persistance in docker 
+- volume mapping 
+- networking in docker 
+ -bridge
+  -user defined bridge
+  -default bridge
+ -null
+ -host
+ -mac vlan 
+ -IpvLan
+ -overlay 
+
+
+- docker compose 
+
+- entrypoint vs CMD
