@@ -1,0 +1,14 @@
+- why github actions?
+- what is CI/CD pipeline 
+- what are CI/CD tools 
+  - jenkins 
+  - limitations of jenkins 
+  - GitHub actions 
+  - deployment vs delivery 
+- workflow 
+  - job
+- runner 
+   - github runner 
+   - self hosted runner
+- what is parrallelism 
+- how to make environment specific jobs 
