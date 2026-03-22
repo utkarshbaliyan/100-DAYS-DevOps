@@ -12,3 +12,4 @@
    - self hosted runner
 - what is parrallelism 
 - how to make environment specific jobs 
+- what is the use of **paths ( how to make pipeline not work if we change someting in a particular repo )
