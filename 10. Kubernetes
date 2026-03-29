@@ -1,1 +1,35 @@
+what is CNCF
+why kubernetes?
+---------------------------------------------------------------------------------------------------------
+kubernetes architecture.
 
+
+what are nodes?
+what is control plane? -controller manager- -api server- -ETCD- -scheduler- 
+what are nodes and what's inside them?
+what are worker nodes? -kubelet- -pods- -service proxy- 
+what is kubectl?
+what is CNI network?
+
+
+---------------------------------------------------------------------------------------------------------
+
+how to create kubernetes cluster?
+
+- kubeadm
+- kind
+- minikube
+- vind
+- EKS, AKS, GKE -  (AWS, azure and GCP)
+
+---------------------------------------------------------------------------------------------------------------
+
+what is manifest file ?
+what are pods?
+what is namespace?
+pods replicas
+what is deployment?
+what is service?
+what are labels and selectors?
+
+------------------------------------------------------------------------------------
