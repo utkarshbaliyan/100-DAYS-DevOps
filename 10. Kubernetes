@@ -31,5 +31,16 @@ pods replicas
 what is deployment?
 what is service?
 what are labels and selectors?
+flow of kubernetes.  
+
+Types of service-
+1. NodePort - kind - portforwarding needed.
+2. Cluster IP
+3. Externam name/IP
+4. Loadbalancer
+5. Headless service
+
 
 ------------------------------------------------------------------------------------ 
+what is ingress?
+what is gateway API?
