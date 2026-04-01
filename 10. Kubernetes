@@ -44,3 +44,31 @@ Types of service-
 ------------------------------------------------------------------------------------ 
 what is ingress?
 what is gateway API?
+
+------------------------------------------------------------------------------------
+
+what are secrets and config map?
+types of secrets-
+
+what is persistent volume?
+what is persistent volume claim?
+
+
+stratigies - -- - ** rollout and recreate container ** by default rollout 
+------------------------------------------------------------------------------------
+
+health check - 
+what are probes 
+types of probes 
+1. liveness
+2. readiness
+3. startup probe
+
+------------------------------------------------------------------------------------
+
+what is container orchestration?
+
+what is request and limits?
+what is auto scaling in k8s?
+what is metric server?
+
