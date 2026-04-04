@@ -1,1 +1,8 @@
+- what is terraform.
+- what is infrastructure as code?
+- terraform lifecycle
+- terraform vs ansible 
+(HCL)- block - parameters - arguments
+- how to connect terraform to AWS CLI
+
 
