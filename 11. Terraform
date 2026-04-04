@@ -4,5 +4,7 @@
 - terraform vs ansible 
 (HCL)- block - parameters - arguments
 - how to connect terraform to AWS CLI
-
-
+- how to create AWS resources with terraform files
+terraform commands 
+terraform workflow
+ 
