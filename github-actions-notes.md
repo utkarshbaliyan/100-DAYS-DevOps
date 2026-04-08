@@ -1,0 +1,1636 @@
+# 🚀 GitHub Actions & CI/CD — Complete Interview Notes
+
+> **Purpose:** Comprehensive revision notes covering CI/CD fundamentals, GitHub Actions architecture, workflows, tools comparison, and advanced concepts.
+
+---
+
+## Table of Contents
+
+1. [CI/CD Fundamentals](#1-cicd-fundamentals)
+2. [CI/CD Tools Comparison](#2-cicd-tools-comparison)
+3. [GitHub Actions — Core Concepts](#3-github-actions--core-concepts)
+4. [Workflow Syntax Deep Dive](#4-workflow-syntax-deep-dive)
+5. [Triggers (Events)](#5-triggers-events)
+6. [Runners](#6-runners)
+7. [Actions — Types & Usage](#7-actions--types--usage)
+8. [Secrets & Environment Variables](#8-secrets--environment-variables)
+9. [Artifacts & Caching](#9-artifacts--caching)
+10. [Environments & Deployments](#10-environments--deployments)
+11. [Matrix Strategy](#11-matrix-strategy)
+12. [Reusable Workflows & Composite Actions](#12-reusable-workflows--composite-actions)
+13. [Security Best Practices](#13-security-best-practices)
+14. [Monitoring, Debugging & Limitations](#14-monitoring-debugging--limitations)
+15. [Advanced Patterns](#15-advanced-patterns)
+16. [Quick Reference Cheat Sheet](#16-quick-reference-cheat-sheet)
+
+---
+
+## 1. CI/CD Fundamentals
+
+### What is CI/CD?
+
+**CI/CD** stands for **Continuous Integration / Continuous Delivery (or Deployment)**. It is a set of practices and automated pipelines that allow teams to ship software frequently, reliably, and with minimal manual intervention.
+
+```
+Developer pushes code
+        │
+        ▼
+  ┌─────────────┐
+  │     CI      │  ← Build, Test, Lint, Scan
+  └──────┬──────┘
+         │
+         ▼
+  ┌─────────────┐
+  │     CD      │  ← Deploy to Staging → Approval → Deploy to Production
+  └─────────────┘
+```
+
+---
+
+### Continuous Integration (CI)
+
+The practice of automatically **integrating code changes** from multiple contributors into a shared repository multiple times a day.
+
+**Goals:**
+- Detect bugs early by running tests on every commit/PR
+- Avoid "integration hell" (merging weeks of diverged code)
+- Maintain a consistently working main branch
+
+**CI Pipeline typically includes:**
+1. Code checkout
+2. Dependency installation
+3. Linting / Static analysis
+4. Unit tests
+5. Integration tests
+6. Build (compile, bundle, containerize)
+7. Security scanning (SAST)
+
+---
+
+### Continuous Delivery (CD — Delivery)
+
+The practice of ensuring that code is **always in a deployable state**. Every change that passes CI is automatically prepared for release to production, but the **actual deployment is triggered manually** (requires human approval).
+
+---
+
+### Continuous Deployment (CD — Deployment)
+
+Goes one step further — every change that passes all automated tests is **automatically deployed to production** without human intervention.
+
+| Practice | Auto-test | Auto-prepare | Auto-deploy |
+|---|---|---|---|
+| CI | ✅ | ❌ | ❌ |
+| Continuous Delivery | ✅ | ✅ | ❌ |
+| Continuous Deployment | ✅ | ✅ | ✅ |
+
+---
+
+### Key CI/CD Concepts
+
+| Term | Definition |
+|---|---|
+| **Pipeline** | A sequence of automated steps (stages/jobs) that code passes through |
+| **Stage** | A logical grouping of jobs (e.g., Build, Test, Deploy) |
+| **Job** | A set of steps that run on the same runner/machine |
+| **Step** | A single task — a shell command or an action |
+| **Artifact** | Files produced by a job and passed to later jobs |
+| **Runner** | The machine/VM/container that executes jobs |
+| **Trigger** | The event that starts the pipeline (push, PR, schedule) |
+| **Environment** | Named deployment target (staging, production) with optional gates |
+
+---
+
+## 2. CI/CD Tools Comparison
+
+### Overview of Major Tools
+
+| Tool | Type | Host | Free Tier | Best For |
+|---|---|---|---|---|
+| **GitHub Actions** | Cloud-native | Cloud (GitHub) | 2000 min/mo (public free) | GitHub-hosted projects |
+| **GitLab CI/CD** | Built-in | Cloud + Self-hosted | 400 min/mo | GitLab repos, full DevSecOps |
+| **Jenkins** | Open Source | Self-hosted | Free (infra cost) | Maximum flexibility, legacy |
+| **CircleCI** | SaaS | Cloud + Self-hosted | 6000 min/mo | Speed, Docker-first |
+| **Travis CI** | SaaS | Cloud | Limited (paid) | Open source (legacy) |
+| **Azure Pipelines** | SaaS | Cloud | 1800 min/mo | Azure/Microsoft ecosystem |
+| **Bitbucket Pipelines** | Built-in | Cloud | 50 min/mo | Bitbucket repos, Atlassian |
+| **Tekton** | Open Source | Self-hosted (K8s) | Free | Kubernetes-native pipelines |
+| **ArgoCD** | Open Source | Self-hosted (K8s) | Free | GitOps-based CD on K8s |
+
+---
+
+### Detailed Comparison
+
+#### GitHub Actions vs Jenkins
+
+| Dimension | GitHub Actions | Jenkins |
+|---|---|---|
+| **Setup** | Zero config, YAML in repo | Requires server setup, plugins |
+| **Maintenance** | Managed by GitHub | You manage updates, plugins, infra |
+| **Ecosystem** | GitHub Marketplace (20k+ actions) | 1800+ plugins |
+| **Scalability** | Auto-scaled by GitHub | Manual scaling or Kubernetes agents |
+| **Cost** | Usage-based | Infrastructure cost |
+| **Flexibility** | Good | Excellent (anything possible) |
+| **Pipeline as Code** | Yes (YAML) | Yes (Jenkinsfile/Groovy) |
+| **Self-hosted runners** | Yes | Yes (agents) |
+
+#### GitHub Actions vs GitLab CI/CD
+
+| Dimension | GitHub Actions | GitLab CI/CD |
+|---|---|---|
+| **Syntax** | YAML (`.github/workflows/`) | YAML (`.gitlab-ci.yml`) |
+| **Registry** | GitHub Container Registry | GitLab Container Registry (built-in) |
+| **Security scanning** | Via actions | Built-in SAST, DAST, secret detection |
+| **Environments** | Supported | Supported + visual pipeline view |
+| **Self-hosted** | Runners | GitLab Runners |
+| **Best for** | GitHub-native teams | All-in-one DevSecOps platform |
+
+#### GitHub Actions vs CircleCI
+
+| Dimension | GitHub Actions | CircleCI |
+|---|---|---|
+| **Speed** | Good | Faster (better caching, parallelism) |
+| **Docker support** | Good | Excellent (first-class) |
+| **Orbs/Actions** | GitHub Marketplace | CircleCI Orbs |
+| **Insights** | Basic | Advanced pipeline analytics |
+| **Setup** | Easier | Slightly more complex |
+
+---
+
+### When to Choose What?
+
+```
+Using GitHub? → GitHub Actions (first choice)
+Need maximum control/customization? → Jenkins
+Using GitLab or need built-in security scanning? → GitLab CI/CD
+Kubernetes-native GitOps deployment? → ArgoCD + Tekton
+Need fastest builds with Docker? → CircleCI
+Azure/Microsoft shop? → Azure Pipelines
+```
+
+---
+
+## 3. GitHub Actions — Core Concepts
+
+### What is GitHub Actions?
+
+GitHub Actions is a **CI/CD and automation platform** built directly into GitHub. It allows you to automate software workflows — build, test, deploy — using YAML files stored in your repository.
+
+**Key facts:**
+- Launched in 2019 (GA)
+- Workflows live in `.github/workflows/` directory
+- Free for public repos; usage-based for private repos
+- Integrates natively with GitHub events (push, PR, issue, release, etc.)
+- Has a marketplace with 20,000+ community-built actions
+
+---
+
+### Architecture Overview
+
+```
+GitHub Repository
+│
+├── .github/
+│   └── workflows/
+│       ├── ci.yml          ← Workflow file
+│       ├── cd.yml
+│       └── codeql.yml
+│
+Event (push, PR, schedule)
+│
+▼
+Workflow triggered
+│
+├── Job 1: Build (runs on ubuntu-latest runner)
+│   ├── Step 1: Checkout code
+│   ├── Step 2: Install dependencies
+│   └── Step 3: Build
+│
+├── Job 2: Test (runs in parallel or after Job 1)
+│   ├── Step 1: Checkout code
+│   └── Step 2: Run tests
+│
+└── Job 3: Deploy (runs after Test passes)
+    ├── Step 1: Download artifact
+    └── Step 2: Deploy to server
+```
+
+---
+
+### Core Components
+
+| Component | Description |
+|---|---|
+| **Workflow** | The entire automation file (`.yml`). One repo can have many workflows. |
+| **Event** | What triggers the workflow (push, pull_request, schedule, etc.) |
+| **Job** | A set of steps. Jobs run in parallel by default, or sequentially with `needs`. |
+| **Step** | Individual task inside a job. Can be a shell command (`run`) or an action (`uses`). |
+| **Action** | A reusable unit of code. Can be from Marketplace, your repo, or Docker Hub. |
+| **Runner** | The machine where jobs execute. GitHub-hosted or self-hosted. |
+
+---
+
+## 4. Workflow Syntax Deep Dive
+
+### Basic Workflow Structure
+
+```yaml
+name: CI Pipeline                    # Workflow name (shown in UI)
+
+on:                                  # Trigger(s)
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:                                 # Workflow-level environment variables
+  NODE_VERSION: '20'
+
+jobs:
+  build:                             # Job ID (must be unique, no spaces)
+    name: Build and Test             # Display name (optional)
+    runs-on: ubuntu-latest           # Runner type
+    
+    env:                             # Job-level env vars
+      APP_ENV: staging
+    
+    steps:
+      - name: Checkout code          # Step display name
+        uses: actions/checkout@v4    # Action reference
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:                        # Input parameters for the action
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci                  # Shell command
+
+      - name: Run tests
+        run: npm test
+        env:                         # Step-level env vars
+          CI: true
+```
+
+---
+
+### Job Dependencies with `needs`
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Building..."
+
+  test:
+    needs: build           # Runs after build completes
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Testing..."
+
+  deploy:
+    needs: [build, test]   # Runs after BOTH complete
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploying..."
+```
+
+**Execution flow:**
+
+```
+build ──► test ──► deploy
+```
+
+---
+
+### Conditional Execution with `if`
+
+```yaml
+steps:
+  # Run only on main branch
+  - name: Deploy to production
+    if: github.ref == 'refs/heads/main'
+    run: ./deploy.sh
+
+  # Run only if previous step failed
+  - name: Notify on failure
+    if: failure()
+    run: curl -X POST $SLACK_WEBHOOK
+
+  # Run always (even if previous steps fail)
+  - name: Cleanup
+    if: always()
+    run: rm -rf /tmp/build
+
+  # Run only on PRs from the same repo (not forks)
+  - name: Post test results
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    run: echo "Not a fork PR"
+```
+
+**Status check functions:**
+
+| Function | Meaning |
+|---|---|
+| `success()` | All previous steps succeeded (default) |
+| `failure()` | Any previous step failed |
+| `always()` | Runs regardless of outcome |
+| `cancelled()` | Workflow was cancelled |
+
+---
+
+### Context Objects
+
+GitHub Actions exposes rich context via `${{ }}` expressions.
+
+```yaml
+# github context — info about the event/repo
+${{ github.sha }}              # Full commit SHA
+${{ github.ref }}              # Branch/tag ref (refs/heads/main)
+${{ github.ref_name }}         # Branch name (main)
+${{ github.actor }}            # Username who triggered it
+${{ github.event_name }}       # Event type (push, pull_request)
+${{ github.repository }}       # owner/repo
+${{ github.run_id }}           # Unique run ID
+${{ github.run_number }}       # Sequential run number
+
+# env context — environment variables
+${{ env.MY_VAR }}
+
+# secrets context — encrypted secrets
+${{ secrets.MY_SECRET }}
+
+# steps context — outputs from steps
+${{ steps.step-id.outputs.output-name }}
+
+# needs context — outputs from other jobs
+${{ needs.build.outputs.version }}
+
+# runner context
+${{ runner.os }}               # Linux, Windows, macOS
+${{ runner.temp }}             # Temp directory path
+
+# vars context — repository/org variables (non-secret)
+${{ vars.APP_URL }}
+```
+
+---
+
+## 5. Triggers (Events)
+
+### Common Triggers
+
+```yaml
+on:
+  # Push to specific branches or tags
+  push:
+    branches:
+      - main
+      - 'release/**'       # Glob patterns supported
+    branches-ignore:
+      - 'dependabot/**'
+    tags:
+      - 'v*.*.*'
+    paths:                  # Only trigger if these paths change
+      - 'src/**'
+      - 'package.json'
+    paths-ignore:
+      - '**.md'
+
+  # Pull Request events
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+  # Manual trigger from UI
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [staging, production]
+      debug:
+        type: boolean
+        default: false
+
+  # Scheduled (cron syntax)
+  schedule:
+    - cron: '0 6 * * 1-5'    # 6 AM UTC, Mon-Fri
+
+  # Call from another workflow
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+    secrets:
+      TOKEN:
+        required: true
+
+  # GitHub event triggers
+  release:
+    types: [published]
+  issues:
+    types: [opened, labeled]
+  issue_comment:
+    types: [created]
+
+  # Repository dispatch (API-triggered)
+  repository_dispatch:
+    types: [deploy-event]
+```
+
+---
+
+### Cron Syntax Reference
+
+```
+┌──────────── minute (0-59)
+│  ┌─────────── hour (0-23)
+│  │  ┌──────────── day of month (1-31)
+│  │  │  ┌─────────── month (1-12)
+│  │  │  │  ┌──────────── day of week (0-6, Sun=0)
+│  │  │  │  │
+*  *  *  *  *
+
+Examples:
+'0 0 * * *'       → Every day at midnight UTC
+'*/15 * * * *'    → Every 15 minutes
+'0 9 * * 1'       → Every Monday at 9 AM UTC
+'0 6 * * 1-5'     → Weekdays at 6 AM UTC
+```
+
+> ⚠️ **Note:** Scheduled workflows may be delayed by up to 15 minutes during high load. Workflows on inactive repos are automatically disabled after 60 days.
+
+---
+
+## 6. Runners
+
+### GitHub-Hosted Runners
+
+Pre-configured VMs managed by GitHub. No setup required.
+
+| Label | OS | CPU | RAM | Storage |
+|---|---|---|---|---|
+| `ubuntu-latest` (ubuntu-24.04) | Ubuntu 24.04 | 4 | 16 GB | 14 GB SSD |
+| `ubuntu-22.04` | Ubuntu 22.04 | 4 | 16 GB | 14 GB SSD |
+| `windows-latest` | Windows Server 2022 | 4 | 16 GB | 14 GB SSD |
+| `macos-latest` (macos-15) | macOS 15 | 3 (M1) | 7 GB | 14 GB SSD |
+| `macos-13` | macOS 13 (Intel) | 3 | 7 GB | 14 GB SSD |
+
+**Larger runners (paid):**
+- Up to 64-core CPU, 256 GB RAM
+- Available for GitHub Team and Enterprise plans
+
+**Pre-installed tools on ubuntu-latest:**
+- Docker, Git, Node.js, Python, Java, Go, .NET, AWS CLI, Azure CLI, kubectl, Terraform, and hundreds more.
+
+**Free tier limits:**
+- Public repos: **unlimited** minutes
+- Private repos: **2,000 min/month** (Free plan), 3,000 (Pro), 10,000 (Team)
+
+**Minute multipliers for private repos:**
+
+| Runner OS | Multiplier |
+|---|---|
+| Linux | 1x |
+| Windows | 2x |
+| macOS | 10x |
+
+---
+
+### Self-Hosted Runners
+
+Run jobs on your own infrastructure — on-premises, cloud VM, container, or Raspberry Pi.
+
+**When to use:**
+- Need specific hardware (GPU, specialized tools)
+- Compliance requirements (data must not leave your network)
+- Need faster/larger machines without paying GitHub
+- Need consistent environment without cold-start
+
+**Setup:**
+
+```bash
+# 1. Go to: Settings → Actions → Runners → New self-hosted runner
+# 2. Download and configure runner agent:
+./config.sh --url https://github.com/OWNER/REPO --token TOKEN
+
+# 3. Start the runner
+./run.sh
+
+# Or install as a service:
+sudo ./svc.sh install
+sudo ./svc.sh start
+```
+
+**Using in workflow:**
+
+```yaml
+jobs:
+  build:
+    runs-on: self-hosted          # Use any self-hosted runner
+    # OR
+    runs-on: [self-hosted, linux, gpu]   # Use labels for specific runners
+```
+
+**Runner groups:** Organize self-hosted runners and control which repos/orgs can use them (Enterprise feature).
+
+> ⚠️ **Security Warning:** Never use self-hosted runners with public repositories — anyone can fork and run malicious code on your machine via PR workflows.
+
+---
+
+## 7. Actions — Types & Usage
+
+### What is an Action?
+
+An **action** is a reusable unit of automation — it can be a Docker container, a JavaScript/TypeScript script, or a composite of steps. Actions are the building blocks of workflows.
+
+### Types of Actions
+
+#### 1. Docker Container Actions
+- Runs inside a Docker container
+- Consistent environment, but slower (container startup time)
+- Can use any language
+
+```yaml
+# action.yml (in action's repo)
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+```
+
+#### 2. JavaScript Actions
+- Fastest (no container startup)
+- Runs directly on the runner
+- Must use Node.js
+
+```yaml
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+```
+
+#### 3. Composite Actions
+- Group multiple steps into one reusable action
+- Can mix `run` and `uses` steps
+- Best for internal reuse within an org
+
+```yaml
+runs:
+  using: 'composite'
+  steps:
+    - run: npm ci
+      shell: bash
+    - run: npm test
+      shell: bash
+```
+
+---
+
+### Using Actions
+
+```yaml
+steps:
+  # From GitHub Marketplace (ALWAYS pin to SHA for security)
+  - uses: actions/checkout@v4                     # By tag
+  - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # By SHA (recommended)
+
+  # From same repository
+  - uses: ./.github/actions/my-composite-action
+
+  # From another repository
+  - uses: org/repo/.github/actions/action-name@main
+
+  # From Docker Hub
+  - uses: docker://alpine:3.18
+```
+
+---
+
+### Essential Marketplace Actions
+
+```yaml
+# Checkout repository
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 0          # Full history for git-based tools
+
+# Setup language runtimes
+- uses: actions/setup-node@v4
+  with:
+    node-version: '20'
+    cache: 'npm'
+
+- uses: actions/setup-python@v5
+  with:
+    python-version: '3.12'
+
+- uses: actions/setup-java@v4
+  with:
+    java-version: '21'
+    distribution: 'temurin'
+
+- uses: actions/setup-go@v5
+  with:
+    go-version: '1.22'
+
+# Docker
+- uses: docker/login-action@v3
+  with:
+    registry: ghcr.io
+    username: ${{ github.actor }}
+    password: ${{ secrets.GITHUB_TOKEN }}
+
+- uses: docker/build-push-action@v6
+  with:
+    push: true
+    tags: ghcr.io/${{ github.repository }}:latest
+
+# Cache dependencies
+- uses: actions/cache@v4
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+# Upload/download artifacts
+- uses: actions/upload-artifact@v4
+  with:
+    name: build-output
+    path: dist/
+
+- uses: actions/download-artifact@v4
+  with:
+    name: build-output
+
+# GitHub releases
+- uses: softprops/action-gh-release@v2
+  with:
+    files: dist/*.tar.gz
+
+# Slack notifications
+- uses: slackapi/slack-github-action@v2
+  with:
+    webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    webhook-type: incoming-webhook
+```
+
+---
+
+## 8. Secrets & Environment Variables
+
+### Types of Variables
+
+| Type | Scope | Encrypted | Use Case |
+|---|---|---|---|
+| **Secrets** | Repo / Env / Org | ✅ Yes | API keys, passwords, tokens |
+| **Variables (vars)** | Repo / Env / Org | ❌ No | Config values (URLs, feature flags) |
+| **env** (inline) | Workflow/Job/Step | ❌ No | Build-time values |
+| **GITHUB_TOKEN** | Workflow | ✅ Auto | GitHub API access |
+
+---
+
+### Secrets
+
+```yaml
+# Access secrets
+- name: Deploy
+  env:
+    API_KEY: ${{ secrets.API_KEY }}
+    DB_PASS: ${{ secrets.DB_PASSWORD }}
+  run: ./deploy.sh
+
+# Secrets are automatically masked in logs
+# ✅ "***" is shown instead of actual value
+```
+
+**Secret scopes:**
+- **Repository secrets:** Available to all workflows in that repo
+- **Environment secrets:** Available only when a job targets that environment
+- **Organization secrets:** Shared across multiple repos (controlled by admins)
+
+**Setting secrets via CLI:**
+```bash
+gh secret set MY_SECRET --body "secret-value"
+gh secret set MY_SECRET < secret-file.txt
+```
+
+---
+
+### GITHUB_TOKEN
+
+Automatically provided to every workflow run. Used to authenticate with GitHub API.
+
+```yaml
+steps:
+  - name: Create issue comment
+    uses: actions/github-script@v7
+    with:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      script: |
+        github.rest.issues.createComment({
+          issue_number: context.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          body: 'Tests passed! ✅'
+        })
+```
+
+**Default permissions (can be tightened):**
+
+```yaml
+permissions:
+  contents: read          # Read repo contents
+  pull-requests: write    # Comment on PRs
+  issues: write           # Create/update issues
+  packages: write         # Push to GitHub Packages
+  id-token: write         # For OIDC (keyless auth to cloud)
+```
+
+---
+
+### OIDC — Keyless Cloud Authentication
+
+Instead of storing cloud credentials as secrets, use **OpenID Connect (OIDC)** to get short-lived tokens directly from cloud providers.
+
+```yaml
+permissions:
+  id-token: write
+  contents: read
+
+steps:
+  - name: Configure AWS credentials (keyless)
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+      role-to-assume: arn:aws:iam::123456789:role/GitHubActionsRole
+      aws-region: us-east-1
+
+  - name: Deploy to AWS
+    run: aws s3 sync dist/ s3://my-bucket/
+```
+
+> ✅ **Best practice:** Always prefer OIDC over long-lived credentials stored as secrets.
+
+---
+
+## 9. Artifacts & Caching
+
+### Artifacts — Sharing Files Between Jobs
+
+Artifacts persist files produced in a job for download or use in other jobs.
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build       # Artifact name
+          path: dist/                  # File or directory to upload
+          retention-days: 7            # Default: 90 days
+          if-no-files-found: error     # error | warn | ignore
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+          path: ./dist                 # Where to place downloaded files
+
+      - run: ls -la ./dist
+```
+
+---
+
+### Caching — Speed Up Workflows
+
+Cache dependencies across runs to avoid re-downloading them every time.
+
+```yaml
+- name: Cache Node modules
+  uses: actions/cache@v4
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+    restore-keys: |
+      ${{ runner.os }}-npm-
+
+# Cache for Python
+- uses: actions/cache@v4
+  with:
+    path: ~/.cache/pip
+    key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+# Cache for Maven
+- uses: actions/cache@v4
+  with:
+    path: ~/.m2
+    key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+```
+
+**How cache keys work:**
+
+```
+key:          Exact match → restore cache
+restore-keys: Prefix match → restore closest cache (partial hit)
+
+Example:
+key: Linux-npm-abc123xyz    ← cache created with this key
+restore-keys: Linux-npm-    ← future runs match this prefix if exact key not found
+```
+
+> ⚠️ **Cache limits:** Max **10 GB** per repo. Caches unused for **7 days** are evicted. Cache is immutable — same key always restores same cache. Update `package-lock.json` to get a new cache.
+
+---
+
+### Artifacts vs Cache
+
+| | Artifacts | Cache |
+|---|---|---|
+| **Purpose** | Share build output between jobs | Speed up installs across runs |
+| **Persistence** | Days to months (configurable) | 7 days of inactivity |
+| **Downloadable** | ✅ Yes | ❌ No (internal only) |
+| **Examples** | Build binaries, test reports, Docker images | node_modules, pip cache, Maven .m2 |
+
+---
+
+## 10. Environments & Deployments
+
+### What are Environments?
+
+Environments represent your **deployment targets** (staging, production). They can have:
+- **Required reviewers** (manual approval gate)
+- **Wait timer** (delay before deployment)
+- **Environment-specific secrets and variables**
+- **Deployment protection rules**
+
+### Creating Environments
+
+Go to: `Settings → Environments → New Environment`
+
+```yaml
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging             # Links job to environment
+    steps:
+      - run: ./deploy.sh staging
+
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://myapp.com         # Shown in GitHub UI
+    steps:
+      - run: ./deploy.sh production
+```
+
+**Environment secrets override repo secrets** of the same name — great for per-env API keys.
+
+---
+
+### Deployment Flow with Approval
+
+```
+push to main
+     │
+     ▼
+  CI (tests pass)
+     │
+     ▼
+deploy-staging ──► Staging environment (auto)
+     │
+     ▼
+deploy-production ──► Production environment ──► ⏳ Waiting for approval
+                                                       │
+                                               👤 Reviewer approves
+                                                       │
+                                                       ▼
+                                               ✅ Deployed to Production
+```
+
+---
+
+## 11. Matrix Strategy
+
+Run a job across multiple configurations simultaneously.
+
+### Basic Matrix
+
+```yaml
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [18, 20, 22]
+      fail-fast: false       # Don't cancel other matrix jobs on failure
+      max-parallel: 4        # Limit concurrent jobs
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+```
+
+**This creates 3 × 3 = 9 parallel jobs** covering all OS × Node version combinations.
+
+---
+
+### Advanced Matrix — Include & Exclude
+
+```yaml
+strategy:
+  matrix:
+    os: [ubuntu-latest, windows-latest]
+    node: [18, 20]
+    include:
+      # Add extra variable to specific combination
+      - os: ubuntu-latest
+        node: 20
+        experimental: true
+      # Add a new combination not in the base matrix
+      - os: macos-latest
+        node: 20
+    exclude:
+      # Remove specific combination
+      - os: windows-latest
+        node: 18
+```
+
+---
+
+### Dynamic Matrix (from JSON)
+
+```yaml
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: echo "matrix={\"service\":[\"api\",\"web\",\"worker\"]}" >> $GITHUB_OUTPUT
+
+  build:
+    needs: prepare
+    strategy:
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Building ${{ matrix.service }}"
+```
+
+---
+
+## 12. Reusable Workflows & Composite Actions
+
+### Reusable Workflows
+
+Call an entire workflow from another workflow. Good for org-wide standard pipelines.
+
+**Define reusable workflow (`.github/workflows/deploy.yml`):**
+
+```yaml
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+    secrets:
+      DEPLOY_KEY:
+        required: true
+    outputs:
+      deploy-url:
+        value: ${{ jobs.deploy.outputs.url }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - id: deploy
+        run: |
+          ./deploy.sh ${{ inputs.environment }}
+          echo "url=https://${{ inputs.environment }}.myapp.com" >> $GITHUB_OUTPUT
+```
+
+**Call it from another workflow:**
+
+```yaml
+jobs:
+  call-deploy:
+    uses: myorg/shared-workflows/.github/workflows/deploy.yml@main
+    with:
+      environment: production
+    secrets:
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      # OR inherit all secrets:
+    secrets: inherit
+```
+
+---
+
+### Composite Actions
+
+Reuse a group of steps as a single action (within same or different repo).
+
+**Create `.github/actions/setup-app/action.yml`:**
+
+```yaml
+name: 'Setup Application'
+description: 'Installs dependencies and sets up the app'
+inputs:
+  node-version:
+    description: 'Node.js version'
+    default: '20'
+outputs:
+  cache-hit:
+    description: 'Whether the cache was hit'
+    value: ${{ steps.cache.outputs.cache-hit }}
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - id: cache
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+    - run: npm ci
+      shell: bash
+```
+
+**Use it:**
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+  - uses: ./.github/actions/setup-app
+    with:
+      node-version: '20'
+```
+
+---
+
+### Reusable Workflow vs Composite Action
+
+| | Reusable Workflow | Composite Action |
+|---|---|---|
+| **Scope** | Full workflow (can have multiple jobs) | Single action (steps within a job) |
+| **Runners** | Defines its own runners | Inherits caller's runner |
+| **Secrets** | Must be explicitly passed or `inherit` | Inherits caller's secrets automatically |
+| **Use case** | Org-wide standard pipelines | Reusable step groups within jobs |
+| **Nesting** | Up to 4 levels deep | Up to 10 composite levels |
+
+---
+
+## 13. Security Best Practices
+
+### Principle of Least Privilege
+
+```yaml
+# Set minimal permissions at workflow level
+permissions:
+  contents: read          # Only read, not write
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+      id-token: write     # Only what this job needs
+```
+
+---
+
+### Pin Actions to Commit SHA
+
+```yaml
+# ❌ Dangerous — tag can be moved
+- uses: actions/checkout@v4
+
+# ✅ Safe — pinned to immutable SHA
+- uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+```
+
+Use **Dependabot** to keep pinned actions up to date:
+
+```yaml
+# .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+```
+
+---
+
+### Handling Untrusted Input (Script Injection)
+
+```yaml
+# ❌ VULNERABLE — PR title injected into shell
+- run: echo "PR title: ${{ github.event.pull_request.title }}"
+
+# ✅ SAFE — pass through environment variable
+- name: Echo PR title safely
+  env:
+    PR_TITLE: ${{ github.event.pull_request.title }}
+  run: echo "PR title: $PR_TITLE"
+```
+
+---
+
+### Security Scanning Workflows
+
+```yaml
+# CodeQL (GitHub's SAST tool)
+- name: Initialize CodeQL
+  uses: github/codeql-action/init@v3
+  with:
+    languages: javascript, python
+
+- name: Perform CodeQL Analysis
+  uses: github/codeql-action/analyze@v3
+
+# Dependency scanning
+- name: Run Snyk to check for vulnerabilities
+  uses: snyk/actions/node@master
+  env:
+    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+# Secret scanning
+- name: Detect hardcoded secrets
+  uses: trufflesecurity/trufflehog@main
+  with:
+    path: ./
+    base: main
+```
+
+---
+
+### Additional Security Rules
+
+- **Never** print secrets to logs (even accidentally via `set -x`)
+- **Avoid** `pull_request_target` with custom code checkout (RCE risk)
+- **Disable** `workflow_dispatch` on unused branches in production repos
+- **Review** third-party actions before using them — check source code
+- **Use** environment protection rules for production deployments
+- **Rotate** secrets regularly and use OIDC where possible
+
+---
+
+## 14. Monitoring, Debugging & Limitations
+
+### Debugging Workflows
+
+```yaml
+# Enable debug logging — set these as repository secrets:
+# ACTIONS_RUNNER_DEBUG = true
+# ACTIONS_STEP_DEBUG = true
+
+# Print all environment variables and context
+- name: Debug context
+  run: |
+    echo "Event: ${{ github.event_name }}"
+    echo "Ref: ${{ github.ref }}"
+    echo "Actor: ${{ github.actor }}"
+    echo "SHA: ${{ github.sha }}"
+
+# Dump entire context
+- name: Dump GitHub context
+  env:
+    GITHUB_CONTEXT: ${{ toJson(github) }}
+  run: echo "$GITHUB_CONTEXT"
+
+# SSH into runner for interactive debugging (tmate)
+- name: Setup tmate session on failure
+  if: failure()
+  uses: mxschmitt/action-tmate@v3
+  with:
+    limit-access-to-actor: true
+```
+
+---
+
+### Workflow Outputs & Setting Variables
+
+```yaml
+steps:
+  - name: Set output
+    id: version
+    run: echo "app-version=1.2.3" >> $GITHUB_OUTPUT
+
+  - name: Use output
+    run: echo "Version is ${{ steps.version.outputs.app-version }}"
+
+  # Set environment variable for subsequent steps in same job
+  - name: Set env var
+    run: echo "BUILD_DATE=$(date -u +%Y-%m-%d)" >> $GITHUB_ENV
+
+  - name: Use env var
+    run: echo "Built on $BUILD_DATE"
+```
+
+---
+
+### GitHub Actions Limitations
+
+| Limitation | Value |
+|---|---|
+| **Workflow run timeout** | Max 35 days |
+| **Job timeout** | Default 6 hours (max 6 hours) |
+| **Step timeout** | No built-in limit (inherits job) |
+| **Workflow file size** | Max 512 KB |
+| **Workflow runs per repo** | Max 500 concurrent |
+| **Jobs per workflow** | Max 500 |
+| **Steps per job** | Max 100 |
+| **Reusable workflow nesting** | Max 4 levels |
+| **Artifact size** | Max 10 GB per artifact |
+| **Total artifact storage** | Max 10 GB per repo |
+| **Cache size** | Max 10 GB per repo |
+| **Secrets** | Max 100 per repo, 1000 per org |
+| **Secret size** | Max 48 KB |
+| **Matrix jobs** | Max 256 jobs per matrix |
+| **API requests per hour** | 1000 for GITHUB_TOKEN |
+| **Scheduled workflow granularity** | Minimum every 5 minutes |
+
+---
+
+### Cost Optimization Tips
+
+- Use `ubuntu-latest` — it's 10x cheaper than macOS and 2x cheaper than Windows
+- Use **caching** aggressively to reduce install time
+- Use `paths` filters to avoid running workflows on docs-only changes
+- Set appropriate `timeout-minutes` to kill runaway jobs
+- Use **concurrency groups** to cancel outdated runs:
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true    # Cancel older runs when new push comes in
+```
+
+---
+
+## 15. Advanced Patterns
+
+### Complete CI/CD Pipeline Example
+
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ─── Lint & Test ────────────────────────────────────
+  test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test -- --coverage
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  # ─── Build Docker Image ──────────────────────────────
+  build:
+    name: Build & Push Image
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha
+            type=ref,event=branch
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─── Deploy to Staging ───────────────────────────────
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.myapp.com
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          IMAGE_TAG: ${{ needs.build.outputs.image-tag }}
+        run: ./scripts/deploy.sh staging "$IMAGE_TAG"
+
+  # ─── Deploy to Production ────────────────────────────
+  deploy-production:
+    name: Deploy to Production
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://myapp.com
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          IMAGE_TAG: ${{ needs.build.outputs.image-tag }}
+        run: ./scripts/deploy.sh production "$IMAGE_TAG"
+
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v2
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {"text": "Production deploy ${{ job.status }} for ${{ github.sha }}"}
+```
+
+---
+
+### Passing Data Between Jobs
+
+```yaml
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      should-deploy: ${{ steps.check.outputs.deploy }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: get-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - id: check
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    needs: prepare
+    if: needs.prepare.outputs.should-deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploying version ${{ needs.prepare.outputs.version }}"
+```
+
+---
+
+### Calling GitHub API with `actions/github-script`
+
+```yaml
+- uses: actions/github-script@v7
+  with:
+    script: |
+      // Auto-label PRs based on file changes
+      const { data: files } = await github.rest.pulls.listFiles({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        pull_number: context.issue.number
+      });
+
+      const labels = new Set();
+      for (const file of files) {
+        if (file.filename.startsWith('src/api/')) labels.add('backend');
+        if (file.filename.startsWith('src/ui/')) labels.add('frontend');
+        if (file.filename.endsWith('.tf')) labels.add('infrastructure');
+      }
+
+      if (labels.size > 0) {
+        await github.rest.issues.addLabels({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: context.issue.number,
+          labels: [...labels]
+        });
+      }
+```
+
+---
+
+## 16. Quick Reference Cheat Sheet
+
+### Workflow Keywords
+
+```yaml
+name:             # Workflow name
+on:               # Trigger events
+env:              # Environment variables
+defaults:         # Default settings for run steps
+concurrency:      # Concurrency groups
+permissions:      # GitHub token permissions
+
+jobs:
+  job-id:
+    name:         # Display name
+    runs-on:      # Runner type
+    needs:        # Job dependencies
+    if:           # Conditional execution
+    environment:  # Deployment environment
+    outputs:      # Job outputs
+    env:          # Job-level env vars
+    timeout-minutes:  # Job timeout
+    strategy:     # Matrix strategy
+    continue-on-error:  # Don't fail workflow if job fails
+    
+    steps:
+      - name:     # Step display name
+        id:       # Step ID (for referencing outputs)
+        uses:     # Action reference
+        run:      # Shell command
+        with:     # Action inputs
+        env:      # Step-level env vars
+        if:       # Conditional execution
+        continue-on-error:  # Don't fail job if step fails
+        timeout-minutes:    # Step timeout
+        working-directory:  # Override working dir
+        shell:    # bash | sh | python | pwsh | cmd
+```
+
+---
+
+### Common Expressions
+
+```yaml
+# String comparison
+if: github.ref == 'refs/heads/main'
+
+# Contains
+if: contains(github.ref, 'release')
+
+# StartsWith / EndsWith
+if: startsWith(github.ref, 'refs/tags/')
+
+# Boolean operators
+if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+if: github.event_name != 'pull_request' || github.actor == 'dependabot[bot]'
+
+# Status checks
+if: success()
+if: failure()
+if: always()
+if: cancelled()
+
+# Format string
+run: echo "Tag is ${{ format('{0}-{1}', github.ref_name, github.sha) }}"
+
+# From JSON
+strategy:
+  matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+
+# To JSON (for debugging)
+env:
+  CTX: ${{ toJSON(github) }}
+
+# Hash files (for cache keys)
+key: ${{ hashFiles('**/package-lock.json') }}
+```
+
+---
+
+### Useful GitHub CLI Commands
+
+```bash
+# View workflow runs
+gh run list
+gh run view <run-id>
+gh run view <run-id> --log
+
+# Re-run failed jobs
+gh run rerun <run-id> --failed
+
+# Trigger manual workflow
+gh workflow run ci.yml
+gh workflow run deploy.yml -f environment=staging
+
+# List/manage secrets
+gh secret list
+gh secret set MY_SECRET
+gh secret delete MY_SECRET
+
+# List workflows
+gh workflow list
+gh workflow enable/disable <workflow-name>
+
+# Download artifacts
+gh run download <run-id>
+```
+
+---
+
+### Interview Quick-Fire Q&A
+
+**Q: What's the difference between a job and a step?**
+> A job is a group of steps that run on the same runner. Steps are individual tasks within a job. Jobs run in parallel by default; steps run sequentially within a job.
+
+**Q: How do you share data between jobs?**
+> Two ways: (1) **Artifacts** — upload files in one job, download in another. (2) **Outputs** — set outputs via `$GITHUB_OUTPUT`, declare in job `outputs:`, and read with `needs.job-id.outputs.key`.
+
+**Q: What is `GITHUB_TOKEN` and where does it come from?**
+> It's an automatically generated short-lived token provided to every workflow run by GitHub. It allows workflows to authenticate to GitHub API without manual secret management. Its permissions can be scoped in the workflow.
+
+**Q: What are the differences between GitHub-hosted and self-hosted runners?**
+> GitHub-hosted runners are managed VMs (Linux/Windows/macOS) with no setup needed — ideal for most cases. Self-hosted runners run on your own infra — useful for specialized hardware, compliance, or cost reduction on large workloads.
+
+**Q: How do you prevent a workflow from running on every push?**
+> Use `paths` filters (only run if specific files change), `branches` filters, `concurrency` (cancel old runs), or conditional `if` expressions.
+
+**Q: What is a matrix strategy?**
+> It's a way to run the same job across multiple configurations simultaneously. Commonly used to test across multiple OS/runtime version combinations.
+
+**Q: How do you make a deployment require manual approval?**
+> Create a GitHub Environment (Settings → Environments), add required reviewers. Any job targeting that environment will pause and wait for approval before executing.
+
+**Q: What's the security risk with `pull_request_target`?**
+> Unlike `pull_request`, `pull_request_target` runs with write permissions and access to secrets even for forks. If the workflow checks out untrusted PR code and runs it, an attacker could exfiltrate secrets.
+
+---
+
+*Notes compiled for DevOps interview preparation. Last updated: 2026.*
+*Reference: [GitHub Actions Docs](https://docs.github.com/en/actions)*
